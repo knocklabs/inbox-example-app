@@ -1,0 +1,1 @@
+ The status of issue **{{title}} ** was updated from **{{previousStatus}}** to ** {{status}}**

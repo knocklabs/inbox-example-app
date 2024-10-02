@@ -1,0 +1,108 @@
+{
+  "name": "inbox-demo",
+  "steps": [
+    {
+      "branches": [
+        {
+          "conditions": {
+            "all": [
+              {
+                "argument": "assignment",
+                "operator": "equal_to",
+                "variable": "data.event"
+              }
+            ]
+          },
+          "name": "Issue assigned",
+          "steps": [
+            {
+              "channel_key": "knock",
+              "ref": "in_app_feed_1",
+              "template": {
+                "action_url": "{{ vars.app_url }}",
+                "markdown_body@": "in_app_feed_1/markdown_body.md"
+              },
+              "type": "channel"
+            }
+          ],
+          "terminates": false
+        },
+        {
+          "conditions": {
+            "all": [
+              {
+                "argument": "statusChange",
+                "operator": "equal_to",
+                "variable": "data.event"
+              }
+            ]
+          },
+          "name": "status change",
+          "steps": [
+            {
+              "channel_key": "knock",
+              "ref": "in_app_feed_2",
+              "template": {
+                "action_url": "{{ vars.app_url }}",
+                "markdown_body@": "in_app_feed_2/markdown_body.md"
+              },
+              "type": "channel"
+            }
+          ],
+          "terminates": false
+        },
+        {
+          "conditions": {
+            "all": [
+              {
+                "argument": "comment",
+                "operator": "equal_to",
+                "variable": "data.event"
+              }
+            ]
+          },
+          "name": "new comment",
+          "steps": [
+            {
+              "channel_key": "knock",
+              "ref": "in_app_feed_3",
+              "template": {
+                "action_url": "{{ vars.app_url }}",
+                "markdown_body@": "in_app_feed_3/markdown_body.md"
+              },
+              "type": "channel"
+            }
+          ],
+          "terminates": false
+        },
+        {
+          "name": "Default",
+          "steps": [
+            {
+              "channel_key": "knock",
+              "ref": "in_app_feed_4",
+              "template": {
+                "action_url": "{{ vars.app_url }}",
+                "markdown_body@": "in_app_feed_4/markdown_body.md"
+              },
+              "type": "channel"
+            }
+          ],
+          "terminates": false
+        }
+      ],
+      "ref": "branch_1",
+      "type": "branch"
+    }
+  ],
+  "trigger_frequency": "every_trigger",
+  "__readonly": {
+    "environment": "development",
+    "key": "inbox-demo",
+    "active": true,
+    "valid": true,
+    "created_at": "2024-10-02T13:35:11.669725Z",
+    "updated_at": "2024-10-02T13:35:11.694960Z",
+    "sha": "OyzIPeeE9Y86gvUD9iSU4HedhFxOLJtfDxdsYZpiSw0="
+  }
+}

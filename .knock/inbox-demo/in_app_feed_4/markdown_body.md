@@ -1,0 +1,1 @@
+Hey **{{ recipient.name | default: "there" }}** 👋 - there's a new activity in your workspace.

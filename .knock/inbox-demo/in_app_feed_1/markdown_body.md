@@ -1,0 +1,1 @@
+The issue **{{title}}** was assigned to {{assignee}} on {{date |date: "%A, %B %d, %y"}} 

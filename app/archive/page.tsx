@@ -3,9 +3,9 @@ import Image from "next/image";
 
 import { Inbox } from "@/app/components/inbox";
 import { accounts, issues } from "@/app/data";
-import { InboxProvider } from "./components/inbox-provider";
+import { InboxProvider } from "../components/inbox-provider";
 
-export default function InboxPage() {
+export default function ArchivePage() {
   const layout = cookies().get("react-resizable-panels:layout:mail");
   const collapsed = cookies().get("react-resizable-panels:collapsed");
 
@@ -34,7 +34,7 @@ export default function InboxPage() {
         <InboxProvider>
           <Inbox
             accounts={accounts}
-            view="inbox"
+            view="archive"
             issues={issues}
             defaultLayout={defaultLayout}
             defaultCollapsed={defaultCollapsed}
