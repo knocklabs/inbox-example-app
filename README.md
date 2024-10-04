@@ -41,11 +41,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 To populate your Knock feed with sample data:
 
-1. Navigate to the home page of your application.
-2. Look for a "Seed Knock Data" button or link (implementation details may vary).
+1. Navigate to the home page of the application.
+2. Look for a "Seed Knock Data" button in the left-hand navigation.
 3. Click the button to trigger the `seedKnockData` server action.
 
-The `seedKnockData` function iterates through each issue in the `issues` array and triggers the "inbox-demo" workflow for three event types: statusChange, assignment, and comment. Each trigger sends the issue data along with the event type to Knock.
+The `seedKnockData` function iterates through each issue in the `issues` array and triggers the "inbox-demo" workflow for three event types: `statusChange`, `assignment`, and `comment`. Each trigger sends the issue data along with the event type to Knock.
 
 ```typescript
 try {
@@ -93,3 +93,111 @@ try {
   );
 }
 ```
+
+## Creating a custom inbox using the feed API
+
+This project uses components and hooks from the `@knocklabs/react` package to create a custom inbox view. Here's how these are utilized:
+
+1. `KnockProvider` component:
+
+   In `inbox-provider.tsx`, we wrap our application with the `KnockProvider` to initialize the Knock client:
+
+   ```typescript
+   import { KnockProvider } from "@knocklabs/react";
+
+   export function InboxProvider({ children }: InboxProviderProps) {
+     return (
+       <KnockProvider
+         apiKey={process.env.NEXT_PUBLIC_KNOCK_API_KEY || ""}
+         userId={process.env.NEXT_PUBLIC_KNOCK_USER_ID || ""}
+       >
+         {children}
+       </KnockProvider>
+     );
+   }
+   ```
+
+   This provider sets up the Knock client with the necessary API key and user ID, making it available to all child components.
+
+2. `useKnockClient` hook:
+
+   ```typescript
+   const knockClient = useKnockClient();
+   ```
+
+   This hook provides access to the Knock client instance for interacting with the Knock API.
+
+3. `useNotifications` hook:
+
+   ```typescript
+   const feed = useNotifications(
+     knockClient,
+     process.env.NEXT_PUBLIC_KNOCK_FEED_CHANNEL_ID || "",
+     {
+       archived: "include",
+     }
+   );
+   ```
+
+   This hook fetches and manages notifications for a specific feed channel. It returns a `feed` object with methods to interact with the notifications.
+
+4. `useNotificationStore` hook:
+   ```typescript
+   const { items, metadata } = useNotificationStore(feed);
+   ```
+   This hook provides access to notification items and metadata, automatically updating when the feed changes.
+
+### Implementing Inbox Functionality
+
+- Separate feed items and archived items. This allows us to create separate views for the inbox and archived items:
+
+  ```typescript
+  const [feedItems, archivedItems] = useMemo(() => {
+    const feedItems = items?.filter((item) => !item.archived_at);
+    const archivedItems = items?.filter((item) => item.archived_at);
+    return [feedItems, archivedItems];
+  }, [items]);
+  ```
+
+- Apply additional filtering based on status and label:
+
+  ```typescript
+  const filteredFeedItems = useMemo(() => {
+    return feedItems?.filter((item) => {
+      const issue = issues.find((i) => i.id === item.data?.id);
+      return (
+        (statusFilter === undefined ||
+          statusFilter === "all" ||
+          issue?.status === statusFilter) &&
+        (labelFilter === undefined ||
+          labelFilter === "all" ||
+          issue?.labels.includes(labelFilter))
+      );
+    });
+  }, [feedItems, issues, statusFilter, labelFilter]);
+  ```
+
+- Fetch latest notifications on component mount:
+
+  ```typescript
+  useEffect(() => {
+    feed.fetch();
+  }, [feed]);
+  ```
+
+- Render filtered items in the `MessageList` component:
+
+  ```typescript
+  <MessageList items={filteredFeedItems} />
+  ```
+
+- Display selected item details in the `MessageDisplay` component:
+  ```typescript
+  <MessageDisplay
+    item={items.find((item) => item.id === message.selected) || null}
+    feed={feed}
+    issues={issues}
+  />
+  ```
+
+By leveraging these hooks, the component efficiently manages and displays notifications from Knock, handles real-time updates, and provides filtering and viewing capabilities for the inbox.
