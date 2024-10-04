@@ -142,10 +142,22 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
    This hook fetches and manages notifications for a specific feed channel. It returns a `feed` object with methods to interact with the notifications.
 
 4. `useNotificationStore` hook:
+
    ```typescript
    const { items, metadata } = useNotificationStore(feed);
    ```
+
    This hook provides access to notification items and metadata, automatically updating when the feed changes.
+
+5. Fetch notifications on component mount:
+
+```typescript
+useEffect(() => {
+  feed.fetch();
+}, [feed]);
+```
+
+Lastly, we need to perform a `fetch` of the feed to load its initial state.
 
 ### Implementing Inbox Functionality
 
@@ -177,14 +189,6 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
   }, [feedItems, issues, statusFilter, labelFilter]);
   ```
 
-- Fetch latest notifications on component mount:
-
-  ```typescript
-  useEffect(() => {
-    feed.fetch();
-  }, [feed]);
-  ```
-
 - Render filtered items in the `MessageList` component:
 
   ```typescript
@@ -201,3 +205,80 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
   ```
 
 By leveraging these hooks, the component efficiently manages and displays notifications from Knock, handles real-time updates, and provides filtering and viewing capabilities for the inbox.
+
+### Managing message status with knockClient
+
+In the `MessageDisplay` component, we utilize the `knockClient` through the `feed` prop to manage the status of messages. This includes marking messages as read/unread and archiving/unarchiving them. Here's how it's implemented:
+
+1. Marking as Read/Unread:
+
+   ```typescript
+   {
+     !item?.read_at ? (
+       <Button
+         // ... other props ...
+         onClick={() => {
+           if (item) {
+             feed.markAsRead(item);
+           }
+         }}
+       >
+         <BookCheck className="h-4 w-4" />
+         <span className="sr-only">Mark as read</span>
+       </Button>
+     ) : (
+       <Button
+         // ... other props ...
+         onClick={() => {
+           if (item) {
+             feed.markAsUnread(item);
+           }
+         }}
+       >
+         <BookX className="h-4 w-4" />
+         <span className="sr-only">Mark as unread</span>
+       </Button>
+     );
+   }
+   ```
+
+   We use the `feed.markAsRead(item)` and `feed.markAsUnread(item)` methods to toggle the read status of a message.
+
+2. Archiving/Unarchiving:
+
+   ```typescript
+   {
+     !item?.archived_at ? (
+       <Button
+         // ... other props ...
+         onClick={() => {
+           if (item) {
+             feed.markAsRead(item);
+             feed.markAsArchived(item);
+           }
+         }}
+       >
+         <Archive className="h-4 w-4" />
+         <span className="sr-only">Archive</span>
+       </Button>
+     ) : (
+       <Button
+         // ... other props ...
+         onClick={() => {
+           if (item) {
+             feed.markAsUnarchived(item);
+           }
+         }}
+       >
+         <ArchiveRestore className="h-4 w-4" />
+         <span className="sr-only">Unarchive</span>
+       </Button>
+     );
+   }
+   ```
+
+   For archiving, we use `feed.markAsArchived(item)`, and for unarchiving, we use `feed.markAsUnarchived(item)`. Note that when archiving, we also mark the item as read.
+
+These methods interact with the Knock API to update the status of messages in real-time. The `feed` object, which is an instance of the Knock Feed API, handles the communication with the server and updates the local state accordingly using optimistic updates.
+
+By using these methods, we ensure that the message status is consistently managed both in the UI and on the server-side, providing a seamless experience for users interacting with their inbox.
