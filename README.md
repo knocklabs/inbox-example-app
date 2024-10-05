@@ -40,10 +40,10 @@
 To populate your Knock feed with sample data:
 
 1. Navigate to the home page of the application.
-2. Look for a "Seed Knock Data" button in the left-hand navigation.
+2. Look for the "Seed Knock Data" button in the left-hand navigation.
 3. Click the button to trigger the `seedKnockData` server action.
 
-The `seedKnockData` function iterates through each issue in the `issues` array and triggers the "inbox-demo" workflow for three event types: `statusChange`, `assignment`, and `comment`. Each trigger sends the issue data along with the event type to Knock.
+The `seedKnockData` function iterates through each issue in the `issues` array stored in `data.tsx` and triggers the `inbox-demo` workflow for three event types: `statusChange`, `assignment`, and `comment`. Each trigger sends the issue data along with the event type to Knock.
 
 ```typescript
 try {
@@ -149,15 +149,17 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
 
 5. Fetch notifications on component mount:
 
-```typescript
-useEffect(() => {
-  feed.fetch();
-}, [feed]);
-```
+   ```typescript
+   useEffect(() => {
+     feed.fetch();
+   }, [feed]);
+   ```
 
-Lastly, we need to perform a `fetch` of the feed to load its initial state.
+   Lastly, we need to perform a `fetch` of the feed to load its initial state. Any realtime updates to the feed are handled automatically by the `useNotificationStore` hook.
 
 ### Implementing inbox functionality
+
+Generally, inboxes allow the user to create separate views for their inbox items and offer more advanced filtering and sorting options than feeds. Let's look at how we can implement these features using Knock's built-in messages statues and some custom filtering logic.
 
 - Separate feed items and archived items. This allows us to create separate views for the inbox and archived items:
 
@@ -169,7 +171,7 @@ Lastly, we need to perform a `fetch` of the feed to load its initial state.
   }, [items]);
   ```
 
-- Apply additional filtering based on status and label:
+- Apply additional filtering based on status and label. The `labelFilter` and `statusFilter` variables are used to store the current filter state:
 
   ```typescript
   const filteredFeedItems = useMemo(() => {
@@ -193,7 +195,7 @@ Lastly, we need to perform a `fetch` of the feed to load its initial state.
   <MessageList items={filteredFeedItems} />
   ```
 
-- Display selected item details in the `MessageDisplay` component:
+- Display selected item details in the `MessageDisplay` component. The `message.selected` variable is used to store the currently selected message:
   ```typescript
   <MessageDisplay
     item={items.find((item) => item.id === message.selected) || null}
@@ -204,13 +206,15 @@ Lastly, we need to perform a `fetch` of the feed to load its initial state.
 
 By leveraging these hooks, the component loads and displays notifications from Knock, handles real-time updates, and provides filtering and viewing capabilities for the inbox.
 
+But inboxes often facilitate additional interactions with the messages, such as marking as read/unread, archiving/unarchiving, and even replying to comments. Let's look at how we can implement these features.
+
 ### Managing message status with knockClient
 
 In the `MessageDisplay` component, we utilize the `knockClient` through the `feed` prop to manage the status of messages. This includes marking messages as read/unread and archiving/unarchiving them. Here's how it's implemented:
 
 1. Receiving the feed prop:
 
-   The `MessageDisplay` component receives the `feed` object as a prop from its parent component:
+   The `MessageDisplay` component receives the `feed` object as a prop from its parent component as well as the current selected `item`:
 
    ```typescript:app/components/message-display.tsx
    export function MessageDisplay({
@@ -280,7 +284,123 @@ In the `MessageDisplay` component, we utilize the `knockClient` through the `fee
        }}
      >
        <Archive className="h-4 w-4" />
-       <span
+       <span className="sr-only">Archive</span>
+     </Button>
+   ) : (
+     <Button
+       // ... other props ...
+       onClick={() => {
+         if (item) {
+           feed.markAsUnarchived(item);
+         }
+       }}
+     >
+       <Unarchive className="h-4 w-4" />
+       <span className="sr-only">Unarchive</span>
+     </Button>
+   )}
+
+   // ... existing code ...
    ```
 
    We use the `feed.markAsArchived(item)` and `feed.markAsUnarchived(item)` methods to toggle the archived status of a message. Since Knock's [message engagement statuses](https://docs.knock.app/send-notifications/message-statuses#engagement-status) are mutually inclusive, we mark the message as read when archiving.
+
+### Handling Comment Replies
+
+The application provides a feature for users to reply to issues directly from the inbox interface. This functionality demonstrates how you can integrate Knock notifications with your existing systems. Here's how it works:
+
+1. Comment Form:
+   In the `MessageDisplay` component, there's a form at the bottom for users to submit comments:
+
+   ```typescript:app/components/message-display.tsx
+   <form onSubmit={handleSubmit}>
+     <div className="grid gap-4">
+       <Textarea
+         className="p-4"
+         placeholder={`Reply to issue ${item?.data?.id}...`}
+         value={comment}
+         onChange={(e) => setComment(e.target.value)}
+       />
+       <div className="flex items-center">
+         <Label
+           htmlFor="mute"
+           className="flex items-center gap-2 text-xs font-normal"
+         >
+           <Switch id="mute" aria-label="Mute thread" /> Mute this thread
+         </Label>
+         <Button type="submit" size="sm" className="ml-auto">
+           Send
+         </Button>
+       </div>
+     </div>
+   </form>
+   ```
+
+2. Handling Form Submission:
+   When a user submits a comment, the application displays a dialog to simulate sending the comment to your system:
+
+   ```typescript:app/components/message-display.tsx
+   const handleSubmit = (e: React.FormEvent) => {
+     e.preventDefault();
+     setIsDialogOpen(true);
+   };
+   ```
+
+   ```typescript:app/components/message-display.tsx
+   <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+     <DialogContent>
+       <DialogHeader>
+         <DialogTitle>Comment Submitted</DialogTitle>
+         <DialogDescription>
+           Your comment has been received and needs to be sent to the system
+           for Issue #{item?.data?.id}.
+         </DialogDescription>
+       </DialogHeader>
+       <div className="mt-4 p-4 bg-muted rounded-md">
+         <p className="text-sm">{comment}</p>
+       </div>
+       <DialogFooter>
+         <Button onClick={handleDialogClose}>Close</Button>
+       </DialogFooter>
+     </DialogContent>
+   </Dialog>
+   ```
+
+3. Integration with Your System and Knock:
+   In a real-world scenario, submitting a comment would typically involve the following steps:
+
+   a. Send the comment to your backend system (e.g., your issue tracking system).
+   b. Your backend system processes the comment and updates the issue.
+   c. After successful processing, your backend triggers a Knock workflow.
+   d. Knock sends out notifications about the new comment to relevant users.
+
+   It's important to note that Knock itself doesn't handle the storage or processing of comments. Instead, Knock's role is to send notifications about new comments or other issue updates to the appropriate users based on the workflows you define.
+
+4. Triggering Knock Workflows:
+   After your system processes the comment, you would trigger a Knock workflow similar to how it's done in the `seedKnockData` function:
+
+   ```typescript
+   await knock.workflows.trigger("inbox-demo", {
+     recipients: [
+       // ... recipient details
+     ],
+     actor: {
+       // ... actor details
+     },
+     data: {
+       id: "ENH-7890",
+       event: "comment",
+       title: "ENH-7890: Optimize database queries",
+       // ... other issue details
+       comments: [
+         {
+           text: "New comment text",
+           datetime: new Date(),
+           author: "Current User",
+         },
+       ],
+     },
+   });
+   ```
+
+By integrating Knock in this way, you can ensure that all relevant parties are notified about new comments and issue updates in real-time, while maintaining the core data and business logic in your own systems.
