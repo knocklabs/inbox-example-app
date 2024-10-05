@@ -1,5 +1,3 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
 1. Configure the environment variables:
@@ -159,7 +157,7 @@ useEffect(() => {
 
 Lastly, we need to perform a `fetch` of the feed to load its initial state.
 
-### Implementing Inbox Functionality
+### Implementing inbox functionality
 
 - Separate feed items and archived items. This allows us to create separate views for the inbox and archived items:
 
@@ -204,7 +202,7 @@ Lastly, we need to perform a `fetch` of the feed to load its initial state.
   />
   ```
 
-By leveraging these hooks, the component efficiently manages and displays notifications from Knock, handles real-time updates, and provides filtering and viewing capabilities for the inbox.
+By leveraging these hooks, the component loads and displays notifications from Knock, handles real-time updates, and provides filtering and viewing capabilities for the inbox.
 
 ### Managing message status with knockClient
 
@@ -228,7 +226,7 @@ In the `MessageDisplay` component, we utilize the `knockClient` through the `fee
    }
    ```
 
-   This `feed` object is an instance of the Knock Feed API, which provides methods for interacting with the Knock service.
+   This `feed` object is an instance of the [Knock Feed object](https://docs.knock.app/sdks/javascript/reference#feed), which provides methods for interacting with Knock's Feed API.
 
 2. Marking as Read/Unread:
 
@@ -284,3 +282,5 @@ In the `MessageDisplay` component, we utilize the `knockClient` through the `fee
        <Archive className="h-4 w-4" />
        <span
    ```
+
+   We use the `feed.markAsArchived(item)` and `feed.markAsUnarchived(item)` methods to toggle the archived status of a message. Since Knock's [message engagement statuses](https://docs.knock.app/send-notifications/message-statuses#engagement-status) are mutually inclusive, we mark the message as read when archiving.
