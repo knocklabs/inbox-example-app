@@ -307,7 +307,7 @@ In the `MessageDisplay` component, we utilize the `knockClient` through the `fee
 
 ### Handling Comment Replies
 
-The application provides a feature for users to reply to issues directly from the inbox interface. This functionality demonstrates how you can integrate Knock notifications with your existing systems. Here's how it works:
+The application provides a feature for users to reply to issues directly from the inbox. This functionality shows how you can integrate Knock notifications with your existing systems. Here's how it works:
 
 1. Comment Form:
    In the `MessageDisplay` component, there's a form at the bottom for users to submit comments:
@@ -337,7 +337,7 @@ The application provides a feature for users to reply to issues directly from th
    ```
 
 2. Handling Form Submission:
-   When a user submits a comment, the application displays a dialog to simulate sending the comment to your system:
+   When a user submits a comment, the app displays a dialog to simulate sending the comment to your system:
 
    ```typescript:app/components/message-display.tsx
    const handleSubmit = (e: React.FormEvent) => {
@@ -369,12 +369,12 @@ The application provides a feature for users to reply to issues directly from th
 3. Integration with Your System and Knock:
    In a real-world scenario, submitting a comment would typically involve the following steps:
 
-   a. Send the comment to your backend system (e.g., your issue tracking system).
-   b. Your backend system processes the comment and updates the issue.
-   c. After successful processing, your backend triggers a Knock workflow.
-   d. Knock sends out notifications about the new comment to relevant users.
+   - Send the comment to your backend system (e.g., your issue tracking system).
+   - Your backend system processes the comment and updates the issue.
+   - After successful processing, your backend triggers a Knock workflow.
+   - Knock sends out notifications about the new comment to relevant users.
 
-   It's important to note that Knock itself doesn't handle the storage or processing of comments. Instead, Knock's role is to send notifications about new comments or other issue updates to the appropriate users based on the workflows you define.
+   It's important to note that Knock doesn't actually process or save comments. Instead, Knock's role is to send notifications about new comments to the appropriate users based on the workflows you define.
 
 4. Triggering Knock Workflows:
    After your system processes the comment, you would trigger a Knock workflow similar to how it's done in the `seedKnockData` function:
