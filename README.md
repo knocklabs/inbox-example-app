@@ -1,3 +1,8 @@
+# Creating a custom inbox with Knock
+
+This project demonstrates how to create a custom inbox using Knock's Feed API and React hooks. The app itself is built using Next.js and ShadCN UI.
+![An inbox for an issue tracking app](./inbox-example-app.png)
+
 ## Getting started
 
 1. Configure the environment variables:
