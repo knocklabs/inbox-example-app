@@ -1,4 +1,4 @@
-## Getting Started
+## Getting started
 
 1. Configure the environment variables:
 
@@ -11,11 +11,11 @@
    KNOCK_SECRET_API_KEY=your_secret_knock_api_key
    ```
 
-   Replace the values with your actual Knock API credentials. The value for NEXT_PUBLIC_KNOCK_USER_ID can be taken from an `account` found in `data.tsx`.
+   Replace the values with your actual Knock API credentials. The value for `NEXT_PUBLIC_KNOCK_USER_ID` can be taken from an `account` found in `data.tsx`.
 
 2. Push and commit the Knock workflow:
 
-   Use the Knock CLI to push and commit the `inbox-demo` workflow in the `.knock/inbox-demo` directory:
+   Use the [Knock CLI](https://docs.knock.app/cli) to push and commit the `inbox-demo` workflow in the `.knock/inbox-demo` directory:
 
    ```bash
    knock workflow push .knock/inbox-demo --commit
@@ -35,7 +35,7 @@
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Seeding Knock Data
+## Seeding Knock data
 
 To populate your Knock feed with sample data:
 
@@ -43,7 +43,7 @@ To populate your Knock feed with sample data:
 2. Look for the "Seed Knock Data" button in the left-hand navigation.
 3. Click the button to trigger the `seedKnockData` server action.
 
-The `seedKnockData` function iterates through each issue in the `issues` array stored in `data.tsx` and triggers the `inbox-demo` workflow for three event types: `statusChange`, `assignment`, and `comment`. Each trigger sends the issue data along with the event type to Knock.
+The `seedKnockData` function iterates through each issue in the `issues` array stored in `data.tsx` and triggers the `inbox-demo` workflow for three event types: `statusChange`, `assignment`, and `comment`. Each trigger sends the issue data along with the event type to Knock. This server-side logic is powered by Knock's [server-side Node SDK](https://github.com/knocklabs/knock-node).
 
 ```typescript
 try {
@@ -98,7 +98,7 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
 
 1. `KnockProvider` component:
 
-   In `inbox-provider.tsx`, we wrap our application with the `KnockProvider` to initialize the Knock client:
+   In `inbox-provider.tsx`, we wrap our application with the [`KnockProvider`](https://docs.knock.app/sdks/react/reference#knockprovider) to initialize the Knock client:
 
    ```typescript
    import { KnockProvider } from "@knocklabs/react";
@@ -123,7 +123,7 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
    const knockClient = useKnockClient();
    ```
 
-   This hook provides access to the Knock client instance for interacting with the Knock API.
+   The [`useKnockClient`](https://docs.knock.app/sdks/react/reference#useknockclient) hook provides access to the Knock client instance for interacting with the Knock API. It's automatically exposed by the `KnockProvider` and can be used to interact with Knock's client-side methods.
 
 3. `useNotifications` hook:
 
@@ -137,7 +137,7 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
    );
    ```
 
-   This hook fetches and manages notifications for a specific feed channel. It returns a `feed` object with methods to interact with the notifications.
+   The [`useNotifications`](https://docs.knock.app/sdks/react/reference#usenotifications) hook fetches and manages notifications for a specific feed channel. It returns a `Feed` object with methods to interact with the notifications.
 
 4. `useNotificationStore` hook:
 
@@ -145,7 +145,7 @@ This project uses components and hooks from the `@knocklabs/react` package to cr
    const { items, metadata } = useNotificationStore(feed);
    ```
 
-   This hook provides access to notification items and metadata, automatically updating when the feed changes.
+   The [`useNotificationStore`](https://docs.knock.app/sdks/react/reference#usenotificationstore) hook provides access to notification items and metadata, automatically updating when the feed changes.
 
 5. Fetch notifications on component mount:
 
@@ -305,7 +305,7 @@ In the `MessageDisplay` component, we utilize the `knockClient` through the `fee
 
    We use the `feed.markAsArchived(item)` and `feed.markAsUnarchived(item)` methods to toggle the archived status of a message. Since Knock's [message engagement statuses](https://docs.knock.app/send-notifications/message-statuses#engagement-status) are mutually inclusive, we mark the message as read when archiving.
 
-### Handling Comment Replies
+### Handling comment replies
 
 The application provides a feature for users to reply to issues directly from the inbox. This functionality shows how you can integrate Knock notifications with your existing systems. Here's how it works:
 
